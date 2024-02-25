@@ -79,7 +79,6 @@ jobs:
           home: ${{ github.workspace }}
           sha: ${{ github.sha }}
           repo: ${{ github.repository }}
-          pat: ${{ secrets.CICD_REQUIREMENT_FREEZE_PAT }}
         run: |
           chmod +x helm-cicd/cicdv2.sh
           helm-cicd/cicdv2.sh $region $service $branch $environment $home $deploy_path $sha $namespace $freeze $pat $repo
