@@ -81,4 +81,4 @@ jobs:
           repo: ${{ github.repository }}
         run: |
           chmod +x helm-cicd/cicdv2.sh
-          helm-cicd/cicdv2.sh $region $service $branch $environment $home $deploy_path $sha $namespace $freeze $pat $repo
+          helm-cicd/cicdv2.sh $region $service $branch $environment $home $deploy_path $sha $namespace $freeze $repo
