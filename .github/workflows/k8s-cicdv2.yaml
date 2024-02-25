@@ -67,7 +67,6 @@ jobs:
         with:
           repository: 14Rahul/helm-cicd
           path: ./helm-cicd
-          token: ${{ secrets.GLOBAL_GITHUB_HTTPS_TOKEN }}
       - name: Build and Deploy
         env:
           service: ${{ inputs.service }}
