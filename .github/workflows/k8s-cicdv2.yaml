@@ -1,0 +1,86 @@
+name: Build and Deploy to K8s CICD v2.0
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service Name'
+        type: string
+        required: true
+        default: '<service-name>'
+      region:
+        description: 'Region'
+        type: choice
+        required: true
+        default: 'ap-south-1'
+        options:
+        - ap-south-1
+        - ca-central-1
+        - eu-west-2
+      environment:
+        description: 'environment'
+        type: choice
+        required: true
+        default: 'dev'
+        options:
+        - dev
+        - qa
+        - staging
+        - prod
+        - pci
+      freeze:
+        description: 'Freeze requirement.txt for Prod?'
+        type: choice
+        required: true
+        default: false
+        options:
+        - true
+        - false
+      namespace:
+        description: 'K8s namespace you want deploy this service'
+        type: string
+        required: true
+        default: '<namespace of service>'
+      deploy_path:
+        description: 'Repo path to deploy'
+        type: string
+        required: true
+        default: '/'
+jobs:
+  Build-Deploy:
+    runs-on: ${{ github.event.inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Cleanup build folder
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: ./repo
+      - name: Checkout Helm Chart repository
+        uses: actions/checkout@v3
+        with:
+          repository: prodigal-tech/aws-code
+          path: ./aws-code
+          token: ${{ secrets.GLOBAL_GITHUB_HTTPS_TOKEN }}
+      - name: Build and Deploy
+        env:
+          service: ${{ inputs.service }}
+          environment: ${{ inputs.environment }}
+          deploy_path: ${{ inputs.deploy_path }}
+          region: ${{ inputs.region }}
+          freeze: ${{ inputs.freeze }}
+          namespace: ${{ inputs.namespace }}
+          branch: ${{ github.ref_name }}
+          home: ${{ github.workspace }}
+          sha: ${{ github.sha }}
+          repo: ${{ github.repository }}
+          pat: ${{ secrets.CICD_REQUIREMENT_FREEZE_PAT }}
+        run: |
+          chmod +x aws-code/cicdv2.sh
+          aws-code/cicdv2.sh $region $service $branch $environment $home $deploy_path $sha $namespace $freeze $pat $repo
